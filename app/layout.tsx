@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Cinzel, Montserrat } from "next/font/google";
+import { ServiceWorkerRegister } from "@/components/pwa/service-worker-register";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
@@ -68,6 +69,7 @@ export default function RootLayout({
           </a>
           {children}
           <Toaster richColors position="top-right" />
+          <ServiceWorkerRegister />
         </ThemeProvider>
       </body>
     </html>
