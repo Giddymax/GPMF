@@ -7,11 +7,11 @@ import { LogoIcon } from "@/components/site/logo";
 import { adminNav } from "@/lib/admin-nav";
 import { cn } from "@/lib/utils";
 
-export function AdminSidebar() {
+export function AdminSidebar({ className }: { className?: string }) {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden w-64 shrink-0 flex-col border-r border-white/10 bg-navy-800 lg:flex">
+    <aside className={cn("hidden w-64 shrink-0 flex-col border-r border-white/10 bg-navy-800 lg:flex", className)}>
       <div className="flex items-center gap-2.5 border-b border-white/10 px-5 py-5">
         <LogoIcon className="h-8 w-8" />
         <div>

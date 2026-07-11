@@ -60,6 +60,16 @@ export interface Client {
   date_of_birth: string | null;
   agent_id: string | null;
   status: ClientStatus;
+  occupation: string | null;
+  email: string | null;
+  region: string | null;
+  area: string | null;
+  digital_address: string | null;
+  interested_products: string[];
+  next_of_kin_name: string | null;
+  next_of_kin_relationship: string | null;
+  next_of_kin_phone: string | null;
+  next_of_kin_address: string | null;
   created_at: string;
 }
 

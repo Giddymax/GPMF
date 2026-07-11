@@ -31,6 +31,14 @@ declare
     'Kwame Duah','Ama Konadu','Kojo Baffoe','Adjoa Amponsah','Kwabena Ofori'
   ];
   v_towns text[] := array['Nsawam','Suhum','Koforidua','Nkawkaw','Mpraeso'];
+  v_occupations text[] := array['Market Trader','Seamstress','Carpenter','Hairdresser','Farmer','Shop Owner','Driver','Teacher'];
+  v_areas text[] := array['Zongo','Trom','Adukrom','New Town','Zongo Junction'];
+  v_kin_names text[] := array[
+    'Abena Owusu','Kwesi Boateng','Efua Asante','Kofi Mensah','Akua Darko',
+    'Yaw Frimpong','Adjoa Osei','Kwabena Sarpong','Afia Appiah','Kojo Nyarko'
+  ];
+  v_kin_relationships text[] := array['Spouse','Sibling','Parent','Child','Cousin'];
+  v_genders text[] := array['female','male'];
 
   v_start date := (current_date - interval '6 months')::date;
   i int;
@@ -69,7 +77,11 @@ begin
   -- CLIENTS + SAVINGS + SUSU ACCOUNTS, round-robin across the 3 agents
   -- ==========================================================================
   for i in 1..30 loop
-    insert into clients (client_code, full_name, phone, ghana_card_no, town, agent_id, status)
+    insert into clients (
+      client_code, full_name, phone, ghana_card_no, town, agent_id, status,
+      date_of_birth, gender, occupation, email, region, area, digital_address,
+      interested_products, next_of_kin_name, next_of_kin_relationship, next_of_kin_phone, next_of_kin_address
+    )
     values (
       'GPFS-' || lpad(i::text, 4, '0'),
       v_names[i],
@@ -77,7 +89,21 @@ begin
       'GHA-' || lpad((100000000 + i)::text, 9, '0') || '-' || (i % 10),
       v_towns[1 + (i % array_length(v_towns, 1))],
       v_agent_ids[1 + (i % 3)],
-      'active'
+      'active',
+      (date '1975-01-01' + ((i * 743) % 9125) * interval '1 day')::date,
+      v_genders[1 + (i % 2)],
+      v_occupations[1 + (i % array_length(v_occupations, 1))],
+      case when i % 2 = 0 then lower(replace(v_names[i], ' ', '.')) || '@example.com' else null end,
+      'Eastern Region',
+      v_areas[1 + (i % array_length(v_areas, 1))],
+      'EN-' || lpad(i::text, 3, '0') || '-' || lpad(((i * 37) % 9999)::text, 4, '0'),
+      array['daily-susu', 'savings']::text[]
+        || case when i <= 8 then array['fixed-deposit'] else array[]::text[] end
+        || case when i <= 15 then array['loans'] else array[]::text[] end,
+      v_kin_names[1 + (i % array_length(v_kin_names, 1))],
+      v_kin_relationships[1 + (i % array_length(v_kin_relationships, 1))],
+      '02441' || lpad((20000 + i)::text, 5, '0'),
+      v_towns[1 + (i % array_length(v_towns, 1))]
     )
     returning id into v_client_id;
     v_client_ids := v_client_ids || v_client_id;
@@ -146,6 +172,12 @@ begin
 
     v_client_ids := v_client_ids; -- no-op, keeps declared var used across loop
   end loop;
+
+  -- The migration's setval() ran before this script (on an empty clients
+  -- table, in a fresh `db reset`), so it couldn't see these 30 rows. Advance
+  -- the sequence now so the next admin-created client gets GPFS-0031, not a
+  -- collision with one we just inserted.
+  perform setval('client_code_seq', 30);
 
   -- ==========================================================================
   -- FIXED DEPOSITS for 8 clients across the 3 tenors

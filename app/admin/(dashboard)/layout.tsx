@@ -18,11 +18,11 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
   const role = session?.profile.role ?? "admin";
 
   return (
-    <div className="dark flex min-h-screen bg-navy-900 text-white">
-      <AdminSidebar />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <AdminTopbar name={name} role={role} />
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">{children}</main>
+    <div className="dark flex min-h-screen bg-navy-900 text-white print:block print:bg-white print:text-black">
+      <AdminSidebar className="print:hidden" />
+      <div className="flex min-w-0 flex-1 flex-col print:block">
+        <AdminTopbar name={name} role={role} className="print:hidden" />
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 print:overflow-visible print:p-0">{children}</main>
       </div>
     </div>
   );

@@ -17,12 +17,12 @@ function initials(name: string) {
   return name.split(" ").map((p) => p[0]).slice(0, 2).join("");
 }
 
-export function AdminTopbar({ name, role }: { name: string; role: string }) {
+export function AdminTopbar({ name, role, className }: { name: string; role: string; className?: string }) {
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const pathname = usePathname();
 
   return (
-    <header className="flex h-16 items-center justify-between border-b border-white/10 bg-navy-900 px-4 sm:px-6">
+    <header className={cn("flex h-16 items-center justify-between border-b border-white/10 bg-navy-900 px-4 sm:px-6", className)}>
       <div className="flex items-center gap-3 lg:hidden">
         <LogoIcon className="h-7 w-7" />
         <Button variant="ghost" size="icon" onClick={() => setMobileOpen(true)} aria-label="Open menu">
