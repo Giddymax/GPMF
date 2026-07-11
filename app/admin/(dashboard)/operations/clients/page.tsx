@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Printer, Search, User } from "lucide-react";
 
 import { CloseClientButton } from "@/components/admin/clients/close-client-button";
+import { DeleteClientDialog } from "@/components/admin/clients/delete-client-dialog";
 import { EditClientDialog } from "@/components/admin/clients/edit-client-dialog";
 import { NewClientDialog } from "@/components/admin/clients/new-client-dialog";
 import { ConnectSupabaseNotice } from "@/components/admin/connect-supabase-notice";
@@ -93,6 +94,7 @@ export default async function ClientsPage({
                       </Link>
                     </Button>
                     <CloseClientButton clientId={client.id} clientName={client.full_name} />
+                    <DeleteClientDialog clientId={client.id} clientName={client.full_name} />
                   </div>
                 </TableCell>
               </TableRow>

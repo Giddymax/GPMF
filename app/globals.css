@@ -154,3 +154,16 @@ body {
     animation: none;
   }
 }
+
+/* Printable A4 documents (client profile sheet, etc.) — zero browser margin
+   so the page's own 210mm/16mm layout is exactly what prints, no double margin. */
+@media print {
+  @page {
+    size: A4;
+    margin: 0;
+  }
+  html,
+  body {
+    background: #fff;
+  }
+}

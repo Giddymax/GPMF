@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getStaffSession } from "@/lib/auth/session";
 import { newClientSchema, type NewClientInput } from "@/lib/validation/client";
 
@@ -187,5 +188,39 @@ export async function closeClient(clientId: string): Promise<ActionResult> {
 
   revalidatePath("/admin/operations/clients");
   revalidatePath(`/admin/operations/clients/${clientId}`);
+  return { ok: true };
+}
+
+/**
+ * Hard delete — for cleaning up dummy/demo/mis-entered clients, not real ones.
+ * Removes the client and every linked row, including their ledger history
+ * (see purge_client() in the migration for why that needs its own function).
+ * Restricted to manager/admin; the confirmation UI makes the caller type the
+ * client's name before this is ever invoked.
+ */
+export async function deleteClient(clientId: string, clientName: string): Promise<ActionResult> {
+  const session = await getStaffSession();
+  if (!session) return { ok: false, error: "Your session has expired. Please sign in again." };
+  if (session.profile.role === "agent") {
+    return { ok: false, error: "Only managers and admins can permanently delete a client." };
+  }
+
+  const supabase = await createClient();
+  await supabase.from("audit_log").insert({
+    actor_id: session.userId,
+    action: "client.delete",
+    entity_type: "clients",
+    entity_id: clientId,
+    diff: { full_name: clientName },
+  });
+
+  const admin = createAdminClient();
+  const { error } = await admin.rpc("purge_client", { p_client_id: clientId });
+  if (error) {
+    console.error("Failed to delete client:", error);
+    return { ok: false, error: "Could not delete the client record." };
+  }
+
+  revalidatePath("/admin/operations/clients");
   return { ok: true };
 }
