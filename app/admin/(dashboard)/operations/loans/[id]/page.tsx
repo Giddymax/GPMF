@@ -4,10 +4,11 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
 import { RepaymentForm } from "@/components/admin/loans/repayment-form";
+import { TransactionActions } from "@/components/admin/ledger/transaction-actions";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { getLoanSchedules, getLoansDetailed } from "@/lib/data/admin";
+import { getLoanRepayments, getLoanSchedules, getLoansDetailed } from "@/lib/data/admin";
 import { formatGHS } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Loan detail" };
@@ -21,7 +22,11 @@ const SCHEDULE_VARIANT: Record<string, "muted" | "gold" | "emerald" | "destructi
 
 export default async function LoanDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [loans, schedules] = await Promise.all([getLoansDetailed(), getLoanSchedules(id)]);
+  const [loans, schedules, repayments] = await Promise.all([
+    getLoansDetailed(),
+    getLoanSchedules(id),
+    getLoanRepayments(id),
+  ]);
   const loan = loans.find((l) => l.id === id);
   if (!loan) notFound();
 
@@ -39,7 +44,16 @@ export default async function LoanDetailPage({ params }: { params: Promise<{ id:
           <h1 className="font-heading text-2xl font-semibold text-white">{loan.loan_number}</h1>
           <p className="mt-1 text-sm text-white/50">{loan.party_name} · {formatGHS(loan.principal)} · {loan.term_months} months</p>
         </div>
-        <Badge variant="gold" className="capitalize">{loan.status}</Badge>
+        <div className="flex items-center gap-3">
+          <Badge variant="gold" className="capitalize">{loan.status}</Badge>
+          {loan.ledger_transaction_id ? (
+            <TransactionActions
+              transactionId={loan.ledger_transaction_id}
+              label={`${loan.loan_number} disbursement`}
+              amount={loan.principal}
+            />
+          ) : null}
+        </div>
       </div>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-3">
@@ -93,6 +107,46 @@ export default async function LoanDetailPage({ params }: { params: Promise<{ id:
                     <TableCell>
                       {s.status === "pending" || s.status === "overdue" || s.status === "partial" ? (
                         <RepaymentForm loanId={loan.id} scheduleId={s.id} defaultAmount={s.total_due} />
+                      ) : null}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card className="mt-6 border-white/10 bg-navy-800">
+        <CardHeader>
+          <CardTitle className="text-white">Repayment history</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {repayments.length === 0 ? (
+            <p className="text-sm text-white/40">No repayments recorded yet.</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow className="border-white/10 hover:bg-transparent">
+                  <TableHead className="text-white/50">Paid</TableHead>
+                  <TableHead className="text-white/50">Amount</TableHead>
+                  <TableHead className="text-white/50">Penalty</TableHead>
+                  <TableHead className="text-white/50" />
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {repayments.map((r) => (
+                  <TableRow key={r.id} className="border-white/5 hover:bg-white/5">
+                    <TableCell className="text-white/70">{new Date(r.paid_at).toLocaleDateString("en-GH")}</TableCell>
+                    <TableCell className="text-white/70">{formatGHS(r.amount)}</TableCell>
+                    <TableCell className="text-white/70">{r.penalty > 0 ? formatGHS(r.penalty) : "—"}</TableCell>
+                    <TableCell>
+                      {r.ledger_transaction_id ? (
+                        <TransactionActions
+                          transactionId={r.ledger_transaction_id}
+                          label={`${loan.loan_number} repayment`}
+                          amount={r.amount}
+                        />
                       ) : null}
                     </TableCell>
                   </TableRow>

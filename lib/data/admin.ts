@@ -18,6 +18,7 @@ import type {
   Loan,
   LoanBalanceRow,
   LoanParBucketRow,
+  LoanRepayment,
   LoanSchedule,
   Post,
   ProductConfig,
@@ -286,6 +287,7 @@ export interface ClientActivityRow {
   type: "savings" | "susu" | "loan_repayment";
   description: string;
   amount: number;
+  ledger_transaction_id: string | null;
 }
 
 /** Merges the client's savings transactions, susu contributions and loan repayments into one feed. */
@@ -303,12 +305,18 @@ export async function getClientActivity(clientId: string): Promise<ClientActivit
     if (savingsAccountId) {
       const { data } = await supabase
         .from("savings_transactions")
-        .select("type, amount, created_at")
+        .select("type, amount, created_at, ledger_transaction_id")
         .eq("account_id", savingsAccountId)
         .order("created_at", { ascending: false })
         .limit(15);
       for (const t of data ?? []) {
-        rows.push({ date: t.created_at, type: "savings", description: `Savings ${t.type}`, amount: t.amount });
+        rows.push({
+          date: t.created_at,
+          type: "savings",
+          description: `Savings ${t.type}`,
+          amount: t.amount,
+          ledger_transaction_id: t.ledger_transaction_id,
+        });
       }
     }
 
@@ -319,7 +327,7 @@ export async function getClientActivity(clientId: string): Promise<ClientActivit
       if (cycleIds.length > 0) {
         const { data } = await supabase
           .from("susu_contributions")
-          .select("cycle_id, amount, collected_at")
+          .select("cycle_id, amount, collected_at, ledger_transaction_id")
           .in("cycle_id", cycleIds)
           .order("collected_at", { ascending: false })
           .limit(15);
@@ -329,6 +337,7 @@ export async function getClientActivity(clientId: string): Promise<ClientActivit
             type: "susu",
             description: `Susu contribution (cycle ${cycleNumberById.get(c.cycle_id) ?? "?"})`,
             amount: c.amount,
+            ledger_transaction_id: c.ledger_transaction_id,
           });
         }
       }
@@ -340,7 +349,7 @@ export async function getClientActivity(clientId: string): Promise<ClientActivit
     if (loanIds.length > 0) {
       const { data } = await supabase
         .from("loan_repayments")
-        .select("loan_id, amount, paid_at")
+        .select("loan_id, amount, paid_at, ledger_transaction_id")
         .in("loan_id", loanIds)
         .order("paid_at", { ascending: false })
         .limit(15);
@@ -350,6 +359,7 @@ export async function getClientActivity(clientId: string): Promise<ClientActivit
           type: "loan_repayment",
           description: `Loan repayment (${loanNumberById.get(r.loan_id) ?? "?"})`,
           amount: r.amount,
+          ledger_transaction_id: r.ledger_transaction_id,
         });
       }
     }
@@ -511,9 +521,93 @@ export async function getLoanSchedules(loanId: string): Promise<LoanSchedule[]> 
   );
 }
 
+export async function getLoanRepayments(loanId: string): Promise<LoanRepayment[]> {
+  const supabase = await createClient();
+  return query(
+    async () => supabase.from("loan_repayments").select("*").eq("loan_id", loanId).order("paid_at", { ascending: false }),
+    []
+  );
+}
+
 export interface AgentCashBalanceRow {
   agent_id: string;
   cash_on_hand: number;
+}
+
+export interface RecentSusuContributionRow {
+  id: string;
+  amount: number;
+  collected_at: string;
+  ledger_transaction_id: string | null;
+  client_name: string;
+  client_code: string;
+}
+
+export async function getRecentSusuContributions(limit = 50): Promise<RecentSusuContributionRow[]> {
+  const supabase = await createClient();
+  if (!isSupabaseConfigured()) return [];
+  try {
+    const { data, error } = await supabase
+      .from("susu_contributions")
+      .select("id, amount, collected_at, ledger_transaction_id, susu_cycles(accounts(client_id, clients(full_name, client_code)))")
+      .order("collected_at", { ascending: false })
+      .limit(limit);
+    if (error) throw error;
+    return (data ?? []).map((row) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const client = (row as any).susu_cycles?.accounts?.clients;
+      return {
+        id: row.id,
+        amount: row.amount,
+        collected_at: row.collected_at,
+        ledger_transaction_id: row.ledger_transaction_id,
+        client_name: client?.full_name ?? "—",
+        client_code: client?.client_code ?? "—",
+      };
+    });
+  } catch (err) {
+    console.error("Failed to load recent susu contributions:", err);
+    return [];
+  }
+}
+
+export interface RecentSavingsTransactionRow {
+  id: string;
+  type: string;
+  amount: number;
+  created_at: string;
+  ledger_transaction_id: string | null;
+  client_name: string;
+  client_code: string;
+}
+
+export async function getRecentSavingsTransactions(limit = 50): Promise<RecentSavingsTransactionRow[]> {
+  const supabase = await createClient();
+  if (!isSupabaseConfigured()) return [];
+  try {
+    const { data, error } = await supabase
+      .from("savings_transactions")
+      .select("id, type, amount, created_at, ledger_transaction_id, accounts(client_id, clients(full_name, client_code))")
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    if (error) throw error;
+    return (data ?? []).map((row) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const client = (row as any).accounts?.clients;
+      return {
+        id: row.id,
+        type: row.type,
+        amount: row.amount,
+        created_at: row.created_at,
+        ledger_transaction_id: row.ledger_transaction_id,
+        client_name: client?.full_name ?? "—",
+        client_code: client?.client_code ?? "—",
+      };
+    });
+  } catch (err) {
+    console.error("Failed to load recent savings transactions:", err);
+    return [];
+  }
 }
 
 export async function getAgentCashBalances(): Promise<AgentCashBalanceRow[]> {

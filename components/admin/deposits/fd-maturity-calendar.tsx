@@ -1,3 +1,4 @@
+import { TransactionActions } from "@/components/admin/ledger/transaction-actions";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { FixedDepositWithClient } from "@/lib/data/admin";
@@ -21,6 +22,7 @@ export function FdMaturityCalendar({ deposits }: { deposits: FixedDepositWithCli
           <TableHead className="text-white/50">Principal</TableHead>
           <TableHead className="text-white/50">Maturity date</TableHead>
           <TableHead className="text-white/50">Days left</TableHead>
+          <TableHead className="text-white/50" />
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -34,6 +36,11 @@ export function FdMaturityCalendar({ deposits }: { deposits: FixedDepositWithCli
               <TableCell className="text-white/70">{new Date(fd.maturity_date).toLocaleDateString("en-GH")}</TableCell>
               <TableCell>
                 <Badge variant={days <= 7 ? "gold" : "muted"}>{days} day{days === 1 ? "" : "s"}</Badge>
+              </TableCell>
+              <TableCell>
+                {fd.ledger_transaction_id ? (
+                  <TransactionActions transactionId={fd.ledger_transaction_id} label={`${fd.fd_number} booking`} amount={fd.principal} />
+                ) : null}
               </TableCell>
             </TableRow>
           );

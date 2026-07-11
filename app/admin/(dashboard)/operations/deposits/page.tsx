@@ -4,18 +4,20 @@ import { ConnectSupabaseNotice } from "@/components/admin/connect-supabase-notic
 import { FdBookingForm } from "@/components/admin/deposits/fd-booking-form";
 import { FdMaturityCalendar } from "@/components/admin/deposits/fd-maturity-calendar";
 import { PendingApprovals } from "@/components/admin/deposits/pending-approvals";
+import { RecentTransactions } from "@/components/admin/deposits/recent-transactions";
 import { TransactionForm } from "@/components/admin/deposits/transaction-form";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getActiveFixedDepositsWithClient, getPendingApprovals } from "@/lib/data/admin";
+import { getActiveFixedDepositsWithClient, getPendingApprovals, getRecentSavingsTransactions } from "@/lib/data/admin";
 import { isSupabaseConfigured } from "@/lib/data/public";
 
 export const metadata: Metadata = { title: "Deposits" };
 
 export default async function DepositsPage() {
-  const [approvals, fds] = await Promise.all([
+  const [approvals, fds, recentTransactions] = await Promise.all([
     getPendingApprovals("savings_withdrawal"),
     getActiveFixedDepositsWithClient(),
+    getRecentSavingsTransactions(50),
   ]);
 
   return (
@@ -30,6 +32,7 @@ export default async function DepositsPage() {
       <Tabs defaultValue="transactions">
         <TabsList>
           <TabsTrigger value="transactions">Transactions</TabsTrigger>
+          <TabsTrigger value="recent">Recent transactions</TabsTrigger>
           <TabsTrigger value="fd">Book fixed deposit</TabsTrigger>
           <TabsTrigger value="calendar">FD maturity calendar</TabsTrigger>
           <TabsTrigger value="approvals">
@@ -42,6 +45,12 @@ export default async function DepositsPage() {
             <CardContent className="pt-6">
               <TransactionForm />
             </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="recent">
+          <Card className="mt-4 border-white/10 bg-navy-800">
+            <RecentTransactions transactions={recentTransactions} />
           </Card>
         </TabsContent>
 

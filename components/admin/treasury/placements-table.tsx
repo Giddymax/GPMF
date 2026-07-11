@@ -4,6 +4,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
+import { TransactionActions } from "@/components/admin/ledger/transaction-actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -54,11 +55,16 @@ export function PlacementsTable({ placements }: { placements: TreasuryPlacement[
               <Badge variant={p.status === "active" ? "emerald" : "muted"} className="capitalize">{p.status}</Badge>
             </TableCell>
             <TableCell>
-              {p.status === "active" ? (
-                <Button size="sm" disabled={pending === p.id} onClick={() => mature(p.id)}>
-                  Mature now
-                </Button>
-              ) : null}
+              <div className="flex items-center gap-1.5">
+                {p.status === "active" ? (
+                  <Button size="sm" disabled={pending === p.id} onClick={() => mature(p.id)}>
+                    Mature now
+                  </Button>
+                ) : null}
+                {p.ledger_transaction_id ? (
+                  <TransactionActions transactionId={p.ledger_transaction_id} label={`${p.instrument} placement`} amount={p.principal} />
+                ) : null}
+              </div>
             </TableCell>
           </TableRow>
         ))}

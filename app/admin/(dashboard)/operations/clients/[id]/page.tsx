@@ -7,6 +7,7 @@ import { ArrowLeft, Download, Printer, User } from "lucide-react";
 import { CloseClientButton } from "@/components/admin/clients/close-client-button";
 import { DeleteClientDialog } from "@/components/admin/clients/delete-client-dialog";
 import { EditClientDialog } from "@/components/admin/clients/edit-client-dialog";
+import { TransactionActions } from "@/components/admin/ledger/transaction-actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -249,12 +250,17 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
           ) : (
             <div className="space-y-2">
               {activity.map((a, i) => (
-                <div key={i} className="flex items-center justify-between border-b border-white/5 py-2 text-sm last:border-0">
+                <div key={i} className="flex items-center justify-between gap-3 border-b border-white/5 py-2 text-sm last:border-0">
                   <div>
                     <p className="text-white/80">{a.description}</p>
                     <p className="text-xs text-white/40">{new Date(a.date).toLocaleString("en-GH")}</p>
                   </div>
-                  <span className="font-medium text-white">{formatGHS(a.amount)}</span>
+                  <div className="flex items-center gap-3">
+                    <span className="font-medium text-white">{formatGHS(a.amount)}</span>
+                    {a.ledger_transaction_id ? (
+                      <TransactionActions transactionId={a.ledger_transaction_id} label={a.description} amount={a.amount} />
+                    ) : null}
+                  </div>
                 </div>
               ))}
             </div>

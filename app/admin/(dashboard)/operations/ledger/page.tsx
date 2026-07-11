@@ -3,14 +3,13 @@ import type { Metadata } from "next";
 import { ConnectSupabaseNotice } from "@/components/admin/connect-supabase-notice";
 import { TransactionsTable } from "@/components/admin/ledger/transactions-table";
 import { Card } from "@/components/ui/card";
-import { getLedgerEntriesForTransactions, getLedgerTransactions } from "@/lib/data/admin";
+import { getLedgerTransactions } from "@/lib/data/admin";
 import { isSupabaseConfigured } from "@/lib/data/public";
 
 export const metadata: Metadata = { title: "Ledger" };
 
 export default async function LedgerPage() {
   const transactions = await getLedgerTransactions(150);
-  const legsByTransaction = await getLedgerEntriesForTransactions(transactions.map((t) => t.id));
 
   return (
     <div>
@@ -24,7 +23,7 @@ export default async function LedgerPage() {
       </div>
 
       <Card className="border-white/10 bg-navy-800">
-        <TransactionsTable transactions={transactions} legsByTransaction={legsByTransaction} />
+        <TransactionsTable transactions={transactions} />
       </Card>
     </div>
   );

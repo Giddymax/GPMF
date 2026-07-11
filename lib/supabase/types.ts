@@ -133,6 +133,7 @@ export interface FixedDeposit {
   start_date: string;
   maturity_date: string;
   status: FdStatus;
+  ledger_transaction_id: string | null;
   created_at: string;
 }
 
@@ -153,6 +154,7 @@ export interface Loan {
   approved_at: string | null;
   disbursed_by: string | null;
   disbursed_at: string | null;
+  ledger_transaction_id: string | null;
   created_at: string;
 }
 
@@ -175,6 +177,7 @@ export interface LoanRepayment {
   penalty: number;
   paid_at: string;
   collected_by: string | null;
+  ledger_transaction_id: string | null;
   created_at: string;
 }
 
@@ -198,6 +201,7 @@ export interface TreasuryPlacement {
   placed_date: string;
   maturity_date: string;
   status: "active" | "matured";
+  ledger_transaction_id: string | null;
   created_at: string;
 }
 

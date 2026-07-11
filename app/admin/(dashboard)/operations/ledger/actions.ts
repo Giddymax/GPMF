@@ -10,6 +10,45 @@ export interface ActionResult {
   error?: string;
 }
 
+export interface TransactionForEdit {
+  id: string;
+  description: string;
+  entry_date: string;
+  legs: { id: string; gl_code: string; gl_name: string; debit: number; credit: number }[];
+}
+
+/** Lazy-load a transaction's full detail — used by the reusable edit/delete
+ * actions dropped into pages that only show a summarized row (Client 360's
+ * activity feed, a loan's repayment history, etc.) without prefetching every
+ * leg for every row up front. */
+export async function getTransactionForEdit(transactionId: string): Promise<TransactionForEdit | null> {
+  const session = await getStaffSession();
+  if (!session) return null;
+
+  const supabase = createAdminClient();
+  const { data: txn } = await supabase
+    .from("ledger_transactions")
+    .select("id, description, entry_date")
+    .eq("id", transactionId)
+    .single();
+  if (!txn) return null;
+
+  const { data: entries } = await supabase
+    .from("ledger_entries")
+    .select("id, debit, credit, gl_accounts(code, name)")
+    .eq("transaction_id", transactionId)
+    .order("created_at");
+
+  return {
+    ...txn,
+    legs: (entries ?? []).map((e) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const gl = (e as any).gl_accounts;
+      return { id: e.id, gl_code: gl?.code ?? "—", gl_name: gl?.name ?? "—", debit: e.debit, credit: e.credit };
+    }),
+  };
+}
+
 export async function reverseTransaction(transactionId: string, reason: string): Promise<ActionResult> {
   const session = await getStaffSession();
   if (!session) return { ok: false, error: "Your session has expired. Please sign in again." };
