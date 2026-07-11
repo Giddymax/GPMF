@@ -9,8 +9,24 @@
  *
  * --role defaults to "admin" and accepts agent | manager | admin.
  */
-import "dotenv/config";
+import { config } from "dotenv";
 import { createClient } from "@supabase/supabase-js";
+
+// dotenv's default `dotenv/config` preload only looks for a file literally
+// named `.env` — it does NOT pick up `.env.local` (that's a Next.js-specific
+// convention, not something the plain `dotenv` package knows about). Point it
+// at `.env.local` explicitly so this script actually reads the same file the
+// README tells you to fill in.
+config({ path: ".env.local", quiet: true });
+
+function jwtRole(token: string): string | null {
+  try {
+    const payload = JSON.parse(Buffer.from(token.split(".")[1], "base64url").toString("utf8"));
+    return payload.role ?? null;
+  } catch {
+    return null;
+  }
+}
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -19,6 +35,17 @@ if (!url || !serviceKey) {
   console.error("Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY (.env.local) first.");
   process.exit(1);
 }
+
+const serviceKeyRole = jwtRole(serviceKey);
+if (serviceKeyRole !== "service_role") {
+  console.error(
+    `SUPABASE_SERVICE_ROLE_KEY doesn't look right — its JWT "role" claim is "${serviceKeyRole ?? "unreadable"}", expected "service_role".\n` +
+      `Double-check you copied the "service_role secret" key (not "anon public") from Supabase → Project Settings → API.`
+  );
+  process.exit(1);
+}
+
+console.log(`Connecting to ${url} as service_role...`);
 
 function getArg(name: string): string | undefined {
   const flag = `--${name}`;
