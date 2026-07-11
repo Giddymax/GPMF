@@ -53,12 +53,12 @@ function getArg(name: string): string | undefined {
   return index !== -1 ? process.argv[index + 1] : undefined;
 }
 
-const email = getArg("email");
-const password = getArg("password");
-const fullName = getArg("name");
+const emailArg = getArg("email");
+const passwordArg = getArg("password");
+const nameArg = getArg("name");
 const role = (getArg("role") ?? "admin") as "agent" | "manager" | "admin";
 
-if (!email || !password || !fullName) {
+if (!emailArg || !passwordArg || !nameArg) {
   console.error(
     'Usage: npm run create-admin -- --email you@example.com --password "Str0ngPass!" --name "Your Name" [--role admin]'
   );
@@ -69,11 +69,31 @@ if (!["agent", "manager", "admin"].includes(role)) {
   process.exit(1);
 }
 
+// Re-bound as definitely-`string` consts: TypeScript's narrowing from the
+// guard above doesn't reliably persist into the async main() closure below.
+const email: string = emailArg;
+const password: string = passwordArg;
+const fullName: string = nameArg;
+
 const supabase = createClient(url, serviceKey, {
   auth: { autoRefreshToken: false, persistSession: false },
 });
 
+async function findExistingUserByEmail(targetEmail: string) {
+  // supabase-js's admin API has no getUserByEmail — page through listUsers().
+  for (let page = 1; page <= 20; page++) {
+    const { data, error } = await supabase.auth.admin.listUsers({ page, perPage: 200 });
+    if (error) return null;
+    const match = data.users.find((u) => u.email?.toLowerCase() === targetEmail.toLowerCase());
+    if (match) return match;
+    if (data.users.length < 200) return null; // last page
+  }
+  return null;
+}
+
 async function main() {
+  let userId: string;
+
   const { data: created, error: createError } = await supabase.auth.admin.createUser({
     email,
     password,
@@ -81,23 +101,42 @@ async function main() {
   });
 
   if (createError) {
-    console.error(`Failed to create ${email}:`, createError.message);
-    process.exit(1);
+    // Most likely cause: this email already exists (e.g. created earlier by
+    // hand in the dashboard). Reset its password instead of failing outright
+    // — that's almost always what someone re-running this command wants.
+    const existing = await findExistingUserByEmail(email);
+    if (!existing) {
+      console.error(`Failed to create ${email}:`, createError.message);
+      process.exit(1);
+    }
+
+    console.log(`${email} already exists in Auth — resetting its password instead of creating a new user.`);
+    const { error: updateError } = await supabase.auth.admin.updateUserById(existing.id, {
+      password,
+      email_confirm: true,
+    });
+    if (updateError) {
+      console.error(`Failed to reset password for ${email}:`, updateError.message);
+      process.exit(1);
+    }
+    userId = existing.id;
+  } else {
+    userId = created.user.id;
   }
 
-  const userId = created.user.id;
-
+  // Upsert, not insert: the profile row may already exist (e.g. from an
+  // earlier partial attempt) — update it in place rather than erroring.
   const { error: profileError } = await supabase
     .from("profiles")
-    .insert({ id: userId, full_name: fullName, role });
+    .upsert({ id: userId, full_name: fullName, role }, { onConflict: "id" });
 
   if (profileError) {
-    console.error(`Auth user created, but the profile insert failed:`, profileError.message);
+    console.error(`Auth user is ready, but the profile upsert failed:`, profileError.message);
     console.error(`You can retry just the profile row later — the user id is: ${userId}`);
     process.exit(1);
   }
 
-  console.log(`Created ${role} login for ${email}. Sign in at /admin/login.`);
+  console.log(`Ready: ${role} login for ${email} (password set to the one you just passed in). Sign in at /admin/login.`);
 }
 
 main();
