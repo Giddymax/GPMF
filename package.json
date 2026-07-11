@@ -10,7 +10,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "seed:staff": "tsx scripts/create-demo-staff.ts",
-    "create-admin": "tsx scripts/create-admin.ts"
+    "create-admin": "tsx scripts/create-admin.ts",
+    "purge:demo": "tsx scripts/purge-demo-data.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
