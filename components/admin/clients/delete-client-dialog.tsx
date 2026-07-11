@@ -61,8 +61,7 @@ export function DeleteClientDialog({ clientId, clientName }: { clientId: string;
           <p className="text-danger-600">
             This cannot be undone. It permanently removes the client, their accounts, and every
             linked transaction — including ledger history. For a real client with genuine
-            activity, use <span className="font-medium">Close</span> instead; this is meant for
-            dummy or mis-entered records.
+            activity, use <span className="font-medium">Close</span> instead.
           </p>
           <div>
             <Label htmlFor="confirmDelete">
