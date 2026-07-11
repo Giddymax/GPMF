@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 280" width="900" height="280">
+  <defs>
+    <!-- Premium 5-Stop Satin Gold Metallic Gradient -->
+    <linearGradient id="premiumGold" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#8A6623" />
+      <stop offset="30%" stop-color="#D4AF37" />
+      <stop offset="50%" stop-color="#F9E8B2" />
+      <stop offset="70%" stop-color="#D4AF37" />
+      <stop offset="100%" stop-color="#A67C1E" />
+    </linearGradient>
+    
+    <!-- Deep Institutional Midnight Onyx/Navy -->
+    <linearGradient id="institutionalBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#051429" />
+      <stop offset="100%" stop-color="#112239" />
+    </linearGradient>
+    
+    <!-- High-End Wealth Growth Emerald -->
+    <linearGradient id="growthEmerald" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0F766E" />
+      <stop offset="100%" stop-color="#10B981" />
+    </linearGradient>
+  </defs>
+
+  <rect width="100%" height="100%" fill="transparent"/>
+
+  <!-- Master Layout Container with Grid Alignment -->
+  <g transform="translate(45, 35)">
+    
+    <!-- THE ICON: Mathematical Balance -->
+    <g id="master-mark">
+      <!-- Institutional Tiered Base Platform -->
+      <path d="M 10,182 L 220,182 L 212,194 L 18,194 Z" fill="url(#institutionalBlue)" />
+      <rect x="5" y="198" width="220" height="10" rx="2" fill="url(#institutionalBlue)" />
+
+      <!-- Architectural Pillars / Financial Bar Chart -->
+      <!-- Adjusted gaps and widths to mathematically perfect proportions (24px wide, 10px spacing) -->
+      <rect x="35" y="115" width="24" height="55" rx="1" fill="url(#premiumGold)" />
+      <rect x="69" y="95" width="24" height="75" rx="1" fill="url(#premiumGold)" />
+      <rect x="103" y="75" width="24" height="95" rx="1" fill="url(#premiumGold)" />
+      <rect x="137" y="55" width="24" height="115" rx="1" fill="url(#premiumGold)" />
+      <rect x="171" y="35" width="24" height="135" rx="1" fill="url(#premiumGold)" />
+
+      <!-- The Pediment / Palace Roof -->
+      <polygon points="5,24 115,0 225,24" fill="url(#institutionalBlue)" />
+      <!-- Architrave (beam beneath the roof) for structural realism -->
+      <rect x="15" y="28" width="200" height="6" fill="url(#institutionalBlue)" opacity="0.9" />
+      
+      <!-- Integrated Projection Arrow (crisp knockout styling) -->
+      <!-- It cuts cleanly behind the front pillars using depth stacking or precise placement -->
+      <path d="M 20,140 L 210,12" stroke="url(#growthEmerald)" stroke-width="6" stroke-linecap="round" fill="none" />
+      <polygon points="210,12 192,15 203,30" fill="url(#growthEmerald)" />
+      
+      <!-- Subtle Core Asset Nodes -->
+      <circle cx="47" cy="125" r="2.5" fill="#FFF" opacity="0.6"/>
+      <circle cx="81" cy="105" r="2.5" fill="#FFF" opacity="0.6"/>
+      <circle cx="115" cy="85" r="2.5" fill="#FFF" opacity="0.6"/>
+      <circle cx="149" cy="65" r="2.5" fill="#FFF" opacity="0.6"/>
+      <circle cx="183" cy="45" r="2.5" fill="#FFF" opacity="0.6"/>
+    </g>
+
+    <!-- TYPOGRAPHY LOCKUP: Hand-tuned kerning using explicit coordinates for premium appearance -->
+    <g id="master-typography" transform="translate(275, 12)">
+      <!-- GRAINY PALACE -->
+      <text x="0" y="80" font-family="'Cinzel', 'Trajan Pro', 'Georgia', serif" font-size="56" font-weight="700" fill="#051429" letter-spacing="3">GRAINY PALACE</text>
+      
+      <!-- Geometric Divider Rule with Accent Core -->
+      <line x1="0" y1="110" x2="520" y2="110" stroke="url(#premiumGold)" stroke-width="2" />
+      <polygon points="260,107 265,110 260,113 255,110" fill="#051429" />
+      
+      <!-- FINANCIAL SERVICE -->
+      <text x="3" y="146" font-family="'Montserrat', 'Helvetica Neue', sans-serif" font-size="20" font-weight="600" fill="#4B5563" letter-spacing="12.5">FINANCIAL SERVICE</text>
+    </g>
+  </g>
+</svg>

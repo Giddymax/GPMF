@@ -1,0 +1,156 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  /* Grainy Palace brand palette (see /public/brand and README §Brand) */
+  --navy-900: #051429;
+  --navy-800: #112239;
+  --gold-500: #d4af37;
+  --gold-700: #8a6623;
+  --gold-200: #f9e8b2;
+  --emerald-600: #0f766e;
+  --emerald-500: #10b981;
+  --grey-600: #4b5563;
+  --surface: #fafaf7;
+
+  --danger-600: #b91c1c;
+  --danger-500: #dc2626;
+
+  --gradient-gold: linear-gradient(
+    45deg,
+    #8a6623 0%,
+    #d4af37 30%,
+    #f9e8b2 50%,
+    #d4af37 70%,
+    #a67c1e 100%
+  );
+  --gradient-navy: linear-gradient(135deg, #051429, #112239);
+  --gradient-emerald: linear-gradient(to top right, #0f766e, #10b981);
+
+  --background: var(--surface);
+  --foreground: var(--navy-900);
+  --card: #ffffff;
+  --card-foreground: var(--navy-900);
+  --border: #e4e0d6;
+  --ring: var(--gold-500);
+  --muted: #f0efe9;
+  --muted-foreground: var(--grey-600);
+  --primary: var(--navy-900);
+  --primary-foreground: #ffffff;
+  --accent: var(--gold-500);
+  --accent-foreground: var(--navy-900);
+  --radius: 0.625rem;
+}
+
+.dark {
+  /* Admin portal is always in this mode; public site opts in via next-themes */
+  --background: var(--navy-900);
+  --foreground: #f5f3ec;
+  --card: var(--navy-800);
+  --card-foreground: #f5f3ec;
+  --border: #223550;
+  --ring: var(--gold-500);
+  --muted: #0c1c33;
+  --muted-foreground: #9aa7b8;
+  --primary: var(--gold-500);
+  --primary-foreground: var(--navy-900);
+  --accent: var(--gold-500);
+  --accent-foreground: var(--navy-900);
+}
+
+@theme inline {
+  --color-navy-900: var(--navy-900);
+  --color-navy-800: var(--navy-800);
+  --color-gold-500: var(--gold-500);
+  --color-gold-700: var(--gold-700);
+  --color-gold-200: var(--gold-200);
+  --color-emerald-600: var(--emerald-600);
+  --color-emerald-500: var(--emerald-500);
+  --color-grey-600: var(--grey-600);
+  --color-surface: var(--surface);
+  --color-danger-600: var(--danger-600);
+  --color-danger-500: var(--danger-500);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --font-heading: var(--font-cinzel);
+  --font-sans: var(--font-montserrat);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-montserrat), Helvetica, Arial, sans-serif;
+}
+
+.font-heading {
+  font-family: var(--font-cinzel), Georgia, serif;
+}
+
+.eyebrow {
+  font-family: var(--font-montserrat), Helvetica, Arial, sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--grey-600);
+}
+
+.bg-gradient-gold {
+  background-image: var(--gradient-gold);
+}
+.bg-gradient-navy {
+  background-image: var(--gradient-navy);
+}
+.bg-gradient-emerald {
+  background-image: var(--gradient-emerald);
+}
+.text-gradient-gold {
+  background-image: var(--gradient-gold);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.rule-gold {
+  height: 3px;
+  border-radius: 999px;
+  background-image: var(--gradient-gold);
+}
+
+@keyframes rise-fade {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-rise {
+  animation: rise-fade 0.6s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise {
+    animation: none;
+  }
+}
