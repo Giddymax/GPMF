@@ -25,8 +25,19 @@ export default async function OpengraphImage() {
           padding: 80,
         }}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={iconDataUrl} width={140} height={140} alt="" />
+        {/* Light chip behind the icon: its pediment/base bars are baked in as navy,
+            which would otherwise vanish against this navy gradient background. */}
+        <div
+          style={{
+            display: "flex",
+            padding: 20,
+            borderRadius: 999,
+            backgroundColor: "#FAFAF7",
+          }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={iconDataUrl} width={140} height={140} alt="" />
+        </div>
         <div
           style={{
             marginTop: 32,

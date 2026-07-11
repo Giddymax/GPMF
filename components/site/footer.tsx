@@ -1,9 +1,9 @@
-import Image from "next/image";
 import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
 
 import { FacebookIcon, InstagramIcon, XIcon } from "@/components/icons/social";
 import { Container } from "@/components/site/container";
+import { LogoIcon } from "@/components/site/logo";
 import { productLinks, siteConfig } from "@/lib/site-config";
 
 export function SiteFooter() {
@@ -13,7 +13,7 @@ export function SiteFooter() {
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <div className="flex items-center gap-2.5">
-              <Image src="/brand/icon-192.png" alt="" width={36} height={36} className="h-9 w-9" />
+              <LogoIcon className="size-9" />
               <span className="font-heading text-lg font-semibold text-white">GRAINY PALACE</span>
             </div>
             <p className="mt-4 text-sm text-white/70">{siteConfig.tagline}</p>
