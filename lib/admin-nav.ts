@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import {
   Banknote,
+  BookText,
   FileText,
   Gauge,
   Inbox,
@@ -24,6 +25,7 @@ export const adminNav: AdminNavItem[] = [
   { label: "Deposits", href: "/admin/operations/deposits", icon: Wallet },
   { label: "Loans", href: "/admin/operations/loans", icon: Banknote },
   { label: "Treasury & Cash", href: "/admin/operations/treasury", icon: Landmark },
+  { label: "Ledger", href: "/admin/operations/ledger", icon: BookText },
   { label: "Reports", href: "/admin/operations/reports", icon: FileText },
   { label: "Website Inbox", href: "/admin/inbox", icon: Inbox },
   { label: "Content & Settings", href: "/admin/content", icon: Settings },

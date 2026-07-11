@@ -41,6 +41,100 @@ async function query<T>(fn: () => Promise<{ data: T | null; error: unknown }>, f
   }
 }
 
+export interface LedgerTransactionRow {
+  id: string;
+  entry_date: string;
+  description: string;
+  reference_type: string;
+  reference_id: string | null;
+  reverses_transaction_id: string | null;
+  created_at: string;
+  total_amount: number;
+  is_reversed: boolean;
+}
+
+export async function getLedgerTransactions(limit = 100): Promise<LedgerTransactionRow[]> {
+  const supabase = await createClient();
+  if (!isSupabaseConfigured()) return [];
+  try {
+    const { data: transactions, error } = await supabase
+      .from("ledger_transactions")
+      .select("id, entry_date, description, reference_type, reference_id, reverses_transaction_id, created_at")
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    if (error) throw error;
+    if (!transactions || transactions.length === 0) return [];
+
+    const ids = transactions.map((t) => t.id);
+    const { data: entries } = await supabase
+      .from("ledger_entries")
+      .select("transaction_id, debit")
+      .in("transaction_id", ids);
+
+    const totalByTxn = new Map<string, number>();
+    for (const e of entries ?? []) {
+      totalByTxn.set(e.transaction_id, (totalByTxn.get(e.transaction_id) ?? 0) + Number(e.debit));
+    }
+
+    const reversedIds = new Set(
+      transactions.map((t) => t.reverses_transaction_id).filter((id): id is string => Boolean(id))
+    );
+
+    return transactions.map((t) => ({
+      ...t,
+      total_amount: totalByTxn.get(t.id) ?? 0,
+      is_reversed: reversedIds.has(t.id),
+    }));
+  } catch (err) {
+    console.error("Failed to load ledger transactions:", err);
+    return [];
+  }
+}
+
+export interface LedgerEntryLegRow {
+  id: string;
+  gl_account_id: string;
+  gl_code: string;
+  gl_name: string;
+  debit: number;
+  credit: number;
+}
+
+/** Fetches every leg for a set of transactions in one query, grouped by transaction_id. */
+export async function getLedgerEntriesForTransactions(
+  transactionIds: string[]
+): Promise<Record<string, LedgerEntryLegRow[]>> {
+  const supabase = await createClient();
+  if (!isSupabaseConfigured() || transactionIds.length === 0) return {};
+  try {
+    const { data, error } = await supabase
+      .from("ledger_entries")
+      .select("id, transaction_id, gl_account_id, debit, credit, gl_accounts(code, name)")
+      .in("transaction_id", transactionIds)
+      .order("created_at");
+    if (error) throw error;
+
+    const grouped: Record<string, LedgerEntryLegRow[]> = {};
+    for (const row of data ?? []) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const gl = (row as any).gl_accounts;
+      const leg: LedgerEntryLegRow = {
+        id: row.id,
+        gl_account_id: row.gl_account_id,
+        gl_code: gl?.code ?? "—",
+        gl_name: gl?.name ?? "—",
+        debit: row.debit,
+        credit: row.credit,
+      };
+      (grouped[row.transaction_id] ??= []).push(leg);
+    }
+    return grouped;
+  } catch (err) {
+    console.error("Failed to load ledger entry legs:", err);
+    return {};
+  }
+}
+
 export async function getGlTrialBalance(): Promise<GlTrialBalanceRow[]> {
   const supabase = await createClient();
   return query(async () => supabase.from("gl_trial_balance").select("*").order("code"), []);
