@@ -70,6 +70,16 @@ portal switch to live data automatically — no code changes needed.
    This prints each login's email and a temporary password. **Change every password** before
    sharing the environment.
 
+   To create a login with your own email/password instead of the canned demo ones:
+
+   ```bash
+   npm run create-admin -- --email you@example.com --password "Str0ngPass!" --name "Your Name"
+   ```
+
+   Both scripts use the service-role key (server-side, bypasses RLS at the API layer), so they
+   work even if your Supabase dashboard role can't run inserts/DDL directly in the SQL editor —
+   avoid creating profile rows by hand in the SQL editor for this reason.
+
 6. **Enable `pg_cron`** (Database → Extensions in the Supabase dashboard) so the automated jobs in
    `supabase/migrations/20260101000300_functions_and_cron.sql` (EOD cash-session autolock, nightly
    PAR re-bucketing / provisioning, end-of-month interest posting + ratio snapshot) actually run.

@@ -9,7 +9,8 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "seed:staff": "tsx scripts/create-demo-staff.ts"
+    "seed:staff": "tsx scripts/create-demo-staff.ts",
+    "create-admin": "tsx scripts/create-admin.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",

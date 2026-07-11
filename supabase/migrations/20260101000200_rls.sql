@@ -79,7 +79,12 @@ create policy inquiries_staff_update on inquiries for update using (is_staff()) 
 alter table profiles enable row level security;
 create policy profiles_self_read on profiles for select using (id = auth.uid() or is_manager_or_admin());
 create policy profiles_self_update on profiles for update using (id = auth.uid()) with check (id = auth.uid());
-create policy profiles_admin_write on profiles for insert with check (is_admin());
+-- Bootstrap escape hatch: on a brand-new project profiles is empty, so
+-- is_admin() is false for everyone and nobody could ever insert the first
+-- row. Allow a free insert only while the table is still empty; every insert
+-- after that first row requires an existing admin.
+create policy profiles_admin_write on profiles for insert
+  with check (is_admin() or not exists (select 1 from profiles));
 
 alter table agents enable row level security;
 create policy agents_staff_read on agents for select using (is_staff());
