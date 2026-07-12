@@ -45,7 +45,7 @@ export function Logo({ className, href = "/" }: { className?: string; href?: str
         <span className="font-heading text-base font-semibold tracking-wide text-foreground sm:text-lg">
           GRAINY PALACE
         </span>
-        <span className="mt-1 text-[9px] font-semibold uppercase tracking-[0.22em] text-muted-foreground sm:text-[10px]">
+        <span className="-mt-0.5 text-[9px] font-semibold uppercase tracking-[0.22em] text-muted-foreground sm:text-[10px]">
           Financial Service
         </span>
       </span>
