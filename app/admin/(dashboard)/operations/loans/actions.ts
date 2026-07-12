@@ -5,6 +5,8 @@ import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStaffSession } from "@/lib/auth/session";
 import { getAvgMonthlySavingsInflow, getInstitutionTotals } from "@/lib/data/admin";
+import { notifyClient } from "@/lib/sms/notify";
+import { smsTemplates } from "@/lib/sms/templates";
 import {
   canDisburse,
   groupDisbursementGate,
@@ -193,6 +195,10 @@ export async function disburseLoan(loanId: string): Promise<ActionResult> {
     .update({ status: "disbursed", disbursed_by: session.userId, disbursed_at: new Date().toISOString(), ledger_transaction_id: txnId })
     .eq("id", loanId);
 
+  if (loan.client_id) {
+    await notifyClient(supabase, loan.client_id, "loan_disbursement", smsTemplates.loanDisbursed(loan.principal, loan.loan_number));
+  }
+
   revalidatePath("/admin/operations/loans");
   return { ok: true };
 }
@@ -245,6 +251,10 @@ export async function recordRepayment(loanId: string, scheduleId: string, amount
 
   const newStatus = amount >= schedule.total_due ? "paid" : "partial";
   await supabase.from("loan_schedules").update({ status: newStatus }).eq("id", scheduleId);
+
+  if (loan.client_id) {
+    await notifyClient(supabase, loan.client_id, "loan_repayment", smsTemplates.loanRepaymentReceived(amount, loan.loan_number));
+  }
 
   revalidatePath("/admin/operations/loans");
   return { ok: true };
@@ -326,6 +336,10 @@ export async function disburseGroupTranche(groupId: string, principalPerMember: 
       ],
       p_created_by: session.userId,
     });
+
+    if (member.client_id) {
+      await notifyClient(supabase, member.client_id, "loan_disbursement", smsTemplates.loanDisbursed(principalPerMember, loanNumber));
+    }
 
     await supabase.from("group_members").update({ status: "current" }).eq("id", member.id);
   }

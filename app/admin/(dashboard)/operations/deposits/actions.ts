@@ -6,6 +6,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getStaffSession } from "@/lib/auth/session";
 import { getAccountBalancesForClient, getClients } from "@/lib/data/admin";
 import { fdInterestEarned } from "@/lib/finance";
+import { notifyClient } from "@/lib/sms/notify";
+import { smsTemplates } from "@/lib/sms/templates";
 import {
   fdBookingSchema,
   fdEarlyWithdrawalRequestSchema,
@@ -69,6 +71,12 @@ async function postSavingsLedger(
     ledger_transaction_id: txnId,
     created_by: createdBy,
   });
+
+  const { data: account } = await supabase.from("accounts").select("client_id").eq("id", accountId).single();
+  if (account?.client_id) {
+    const message = type === "deposit" ? smsTemplates.depositReceived(amount) : smsTemplates.withdrawalProcessed(amount);
+    await notifyClient(supabase, account.client_id, type === "deposit" ? "savings_deposit" : "savings_withdrawal", message);
+  }
 }
 
 export async function postSavingsTransaction(input: SavingsTransactionInput): Promise<ActionResult> {
@@ -183,6 +191,7 @@ export async function bookFixedDeposit(input: FdBookingInput): Promise<ActionRes
   }
 
   await supabase.from("fixed_deposits").update({ ledger_transaction_id: txnId }).eq("id", fd.id);
+  await notifyClient(supabase, data.clientId, "fd_booking", smsTemplates.fdBooked(data.principal, fdNumber));
 
   revalidatePath("/admin/operations/deposits");
   return { ok: true };
@@ -241,6 +250,7 @@ export async function payOutMaturedFd(fdId: string): Promise<ActionResult> {
 
   await supabase.from("fixed_deposits").update({ status: "withdrawn" }).eq("id", fdId);
   await logFdEvent(supabase, fdId, "matured_paid_out", session.userId, total);
+  await notifyClient(supabase, fd.client_id, "fd_maturity_payout", smsTemplates.fdMaturityPaidOut(total, fd.fd_number));
 
   revalidatePath("/admin/operations/deposits");
   return { ok: true };
@@ -312,6 +322,7 @@ export async function approveFdEarlyWithdrawal(approvalId: string, approve: bool
 
     await supabase.from("fixed_deposits").update({ status: "terminated_early" }).eq("id", fdId);
     await logFdEvent(supabase, fdId, "early_withdrawal_approved", session.userId, fd.principal);
+    await notifyClient(supabase, fd.client_id, "fd_early_withdrawal", smsTemplates.fdEarlyWithdrawalPaid(fd.principal, fd.fd_number));
   } else {
     await logFdEvent(supabase, fdId, "early_withdrawal_rejected", session.userId, undefined, reason);
   }
@@ -453,6 +464,7 @@ export async function approveFdRollover(approvalId: string, approve: boolean, re
     await supabase.from("fixed_deposits").update({ ledger_transaction_id: txnId }).eq("id", newFd.id);
     await supabase.from("fixed_deposits").update({ status: "rolled_over", rolled_into_fd_id: newFd.id }).eq("id", fdId);
     await logFdEvent(supabase, fdId, "rollover_completed", session.userId, newPrincipal, `Rolled into ${newFdNumber}`);
+    await notifyClient(supabase, fd.client_id, "fd_rollover", smsTemplates.fdRolledOver(newPrincipal, fd.fd_number, newFdNumber));
   } else {
     await logFdEvent(supabase, fdId, "rollover_rejected", session.userId, undefined, reason);
   }

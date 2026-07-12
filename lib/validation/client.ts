@@ -11,6 +11,7 @@ export const newClientSchema = z.object({
   // Personal info
   fullName: z.string().trim().min(2, "Enter the client's full name"),
   phone: z.string().trim().min(9, "Enter a valid phone number"),
+  smsOptIn: z.boolean().default(true),
   email: z.string().trim().email("Enter a valid email address").optional().or(z.literal("")),
   dateOfBirth: z.string().optional().or(z.literal("")),
   gender: z.enum(["female", "male", "other"]).optional().or(z.literal("")),

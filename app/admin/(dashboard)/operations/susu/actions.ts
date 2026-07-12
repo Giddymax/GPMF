@@ -5,6 +5,8 @@ import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStaffSession } from "@/lib/auth/session";
 import { cycleCommission, cyclePayout, SUSU_CYCLE_DAYS } from "@/lib/finance";
+import { notifyClient } from "@/lib/sms/notify";
+import { smsTemplates } from "@/lib/sms/templates";
 
 export interface ActionResult {
   ok: boolean;
@@ -18,7 +20,11 @@ export async function recordSusuContribution(cycleId: string, agentId: string, a
 
   const supabase = createAdminClient();
 
-  const { data: cycle } = await supabase.from("susu_cycles").select("account_id").eq("id", cycleId).single();
+  const { data: cycle } = await supabase
+    .from("susu_cycles")
+    .select("account_id, accounts!inner(client_id)")
+    .eq("id", cycleId)
+    .single();
   if (!cycle) return { ok: false, error: "Cycle not found." };
 
   const { data: txnId, error: postError } = await supabase.rpc("post_ledger_transaction", {
@@ -47,6 +53,11 @@ export async function recordSusuContribution(cycleId: string, agentId: string, a
     return { ok: false, error: "Ledger posted but the collection log failed — contact support." };
   }
 
+  const clientId = (cycle as unknown as { accounts: { client_id: string } }).accounts?.client_id;
+  if (clientId) {
+    await notifyClient(supabase, clientId, "susu_contribution", smsTemplates.susuContributionReceived(amount));
+  }
+
   revalidatePath("/admin/operations/susu");
   return { ok: true };
 }
@@ -58,7 +69,7 @@ export async function processSusuPayout(cycleId: string, agentId: string): Promi
   const supabase = createAdminClient();
   const { data: cycle } = await supabase
     .from("susu_cycles")
-    .select("account_id, daily_amount")
+    .select("account_id, daily_amount, accounts!inner(client_id)")
     .eq("id", cycleId)
     .single();
   if (!cycle) return { ok: false, error: "Cycle not found." };
@@ -89,6 +100,11 @@ export async function processSusuPayout(cycleId: string, agentId: string): Promi
   }
 
   await supabase.from("susu_cycles").update({ status: "paid_out" }).eq("id", cycleId);
+
+  const clientId = (cycle as unknown as { accounts: { client_id: string } }).accounts?.client_id;
+  if (clientId) {
+    await notifyClient(supabase, clientId, "susu_payout", smsTemplates.susuPayoutCompleted(payout));
+  }
 
   revalidatePath("/admin/operations/susu");
   return { ok: true };

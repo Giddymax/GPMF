@@ -62,12 +62,13 @@ export function ClientForm({
     setValue,
     watch,
     formState: { errors, isSubmitting },
-  } = useForm<NewClientInput>({ defaultValues: { interestedProducts: [], ...defaultValues } });
+  } = useForm<NewClientInput>({ defaultValues: { interestedProducts: [], smsOptIn: true, ...defaultValues } });
 
   const agentId = watch("agentId");
   const gender = watch("gender");
   const interestedProducts = watch("interestedProducts") ?? [];
   const photoUrl = watch("photoUrl");
+  const smsOptIn = watch("smsOptIn");
 
   async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -145,6 +146,10 @@ export function ClientForm({
         <FormField label="Occupation (optional)" htmlFor="occupation">
           <Input id="occupation" {...register("occupation")} />
         </FormField>
+        <label className="flex items-center gap-2 text-sm">
+          <Checkbox checked={smsOptIn} onCheckedChange={(checked) => setValue("smsOptIn", checked === true)} />
+          Send SMS notifications for transactions on this client&apos;s accounts
+        </label>
       </section>
 
       <section className="space-y-4">

@@ -22,6 +22,7 @@ function toFormValues(client: Client): Partial<NewClientInput> {
   return {
     fullName: client.full_name,
     phone: client.phone ?? "",
+    smsOptIn: client.sms_opt_in,
     email: client.email ?? "",
     dateOfBirth: client.date_of_birth ?? "",
     gender: (client.gender as NewClientInput["gender"]) ?? undefined,

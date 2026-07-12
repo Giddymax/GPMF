@@ -31,6 +31,7 @@ export async function createNewClient(input: NewClientInput): Promise<CreateClie
     .insert({
       full_name: data.fullName,
       phone: data.phone,
+      sms_opt_in: data.smsOptIn,
       email: data.email || null,
       date_of_birth: data.dateOfBirth || null,
       gender: data.gender || null,
@@ -101,6 +102,7 @@ export async function updateClient(clientId: string, input: NewClientInput): Pro
     .update({
       full_name: data.fullName,
       phone: data.phone,
+      sms_opt_in: data.smsOptIn,
       email: data.email || null,
       date_of_birth: data.dateOfBirth || null,
       gender: data.gender || null,

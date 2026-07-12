@@ -78,6 +78,7 @@ export interface Client {
   next_of_kin_relationship: string | null;
   next_of_kin_phone: string | null;
   next_of_kin_address: string | null;
+  sms_opt_in: boolean;
   created_at: string;
 }
 
