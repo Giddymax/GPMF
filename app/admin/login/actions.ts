@@ -9,7 +9,25 @@ export interface SignInResult {
   error?: string;
 }
 
-export async function signIn(email: string, password: string, next?: string): Promise<SignInResult> {
+/**
+ * Bound directly to <form action={signIn}> (see LoginForm) rather than
+ * invoked from an onSubmit handler, so the browser's native form submission
+ * IS the correct POST — this keeps sign-in working via progressive
+ * enhancement even if client JS hasn't hydrated yet on a slow mobile
+ * connection. A plain onSubmit-intercepted version would fall back to a
+ * bare native GET-to-current-URL submission in that race, which reloads the
+ * page with credentials in the query string and empty fields — exactly the
+ * "input clears with no error" bug this was built to fix.
+ */
+export async function signIn(prevState: SignInResult | null, formData: FormData): Promise<SignInResult> {
+  const email = String(formData.get("email") || "").trim();
+  const password = String(formData.get("password") || "");
+  const next = String(formData.get("next") || "");
+
+  if (!email || !password) {
+    return { ok: false, error: "Enter both your email and password." };
+  }
+
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL.includes("your-project-ref")) {
     return { ok: false, error: "No Supabase project connected yet. Set up .env.local first (see README)." };
   }
