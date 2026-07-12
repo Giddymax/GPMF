@@ -8,17 +8,18 @@ import { RecentTransactions } from "@/components/admin/deposits/recent-transacti
 import { TransactionForm } from "@/components/admin/deposits/transaction-form";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getActiveFixedDepositsWithClient, getPendingApprovals, getRecentSavingsTransactions } from "@/lib/data/admin";
+import { getFdEvents, getFixedDepositsWithClient, getPendingApprovals, getRecentSavingsTransactions } from "@/lib/data/admin";
 import { isSupabaseConfigured } from "@/lib/data/public";
 
 export const metadata: Metadata = { title: "Deposits" };
 
 export default async function DepositsPage() {
   const [approvals, fds, recentTransactions] = await Promise.all([
-    getPendingApprovals("savings_withdrawal"),
-    getActiveFixedDepositsWithClient(),
+    getPendingApprovals(),
+    getFixedDepositsWithClient(),
     getRecentSavingsTransactions(50),
   ]);
+  const fdEvents = await getFdEvents(fds.map((fd) => fd.id));
 
   return (
     <div>
@@ -64,13 +65,13 @@ export default async function DepositsPage() {
 
         <TabsContent value="calendar">
           <Card className="mt-4 border-white/10 bg-navy-800">
-            <FdMaturityCalendar deposits={fds} />
+            <FdMaturityCalendar deposits={fds} pendingApprovals={approvals} events={fdEvents} />
           </Card>
         </TabsContent>
 
         <TabsContent value="approvals">
           <Card className="mt-4 border-white/10 bg-navy-800">
-            <PendingApprovals approvals={approvals} />
+            <PendingApprovals approvals={approvals} fixedDeposits={fds} />
           </Card>
         </TabsContent>
       </Tabs>

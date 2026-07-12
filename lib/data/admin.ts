@@ -10,6 +10,7 @@ import type {
   CashSession,
   Client,
   Faq,
+  FdEvent,
   FixedDeposit,
   GlTrialBalanceRow,
   Group,
@@ -704,14 +705,14 @@ export interface FixedDepositWithClient extends FixedDeposit {
   client_code: string;
 }
 
-export async function getActiveFixedDepositsWithClient(): Promise<FixedDepositWithClient[]> {
+export async function getFixedDepositsWithClient(): Promise<FixedDepositWithClient[]> {
   const supabase = await createClient();
   if (!isSupabaseConfigured()) return [];
   try {
     const { data, error } = await supabase
       .from("fixed_deposits")
       .select("*, clients(full_name, client_code)")
-      .eq("status", "active")
+      .in("status", ["active", "matured"])
       .order("maturity_date");
     if (error) throw error;
     return (data ?? []).map((fd) => {
@@ -723,6 +724,20 @@ export async function getActiveFixedDepositsWithClient(): Promise<FixedDepositWi
     console.error("Failed to load fixed deposits:", err);
     return [];
   }
+}
+
+export async function getFdEvents(fdIds: string[]): Promise<Record<string, FdEvent[]>> {
+  if (fdIds.length === 0) return {};
+  const supabase = await createClient();
+  const rows = await query<FdEvent[]>(
+    async () => supabase.from("fd_events").select("*").in("fd_id", fdIds).order("created_at", { ascending: false }),
+    []
+  );
+  const byFd: Record<string, FdEvent[]> = {};
+  for (const row of rows) {
+    (byFd[row.fd_id] ??= []).push(row);
+  }
+  return byFd;
 }
 
 export async function getTreasuryPlacements(): Promise<TreasuryPlacement[]> {

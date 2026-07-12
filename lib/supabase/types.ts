@@ -10,7 +10,15 @@ export type ClientStatus = "active" | "dormant" | "closed";
 export type AccountType = "savings" | "susu";
 export type AccountStatus = "active" | "dormant" | "closed";
 export type SusuCycleStatus = "active" | "completed" | "paid_out" | "rolled_over";
-export type FdStatus = "active" | "matured" | "terminated_early" | "rolled_over";
+export type FdStatus = "active" | "matured" | "terminated_early" | "rolled_over" | "withdrawn";
+export type FdEventType =
+  | "early_withdrawal_requested"
+  | "early_withdrawal_approved"
+  | "early_withdrawal_rejected"
+  | "matured_paid_out"
+  | "rollover_requested"
+  | "rollover_completed"
+  | "rollover_rejected";
 export type LoanType = "individual" | "group";
 export type LoanStatus =
   | "pending"
@@ -134,6 +142,18 @@ export interface FixedDeposit {
   maturity_date: string;
   status: FdStatus;
   ledger_transaction_id: string | null;
+  rolled_into_fd_id: string | null;
+  rolled_from_fd_id: string | null;
+  created_at: string;
+}
+
+export interface FdEvent {
+  id: string;
+  fd_id: string;
+  event_type: FdEventType;
+  amount: number | null;
+  actor_id: string | null;
+  notes: string | null;
   created_at: string;
 }
 

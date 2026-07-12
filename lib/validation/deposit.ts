@@ -17,3 +17,18 @@ export const fdBookingSchema = z.object({
 });
 
 export type FdBookingInput = z.infer<typeof fdBookingSchema>;
+
+export const fdEarlyWithdrawalRequestSchema = z.object({
+  fdId: z.string().uuid(),
+  notes: z.string().max(500).optional(),
+});
+
+export type FdEarlyWithdrawalRequestInput = z.infer<typeof fdEarlyWithdrawalRequestSchema>;
+
+export const fdRolloverRequestSchema = z.object({
+  fdId: z.string().uuid(),
+  newTermMonths: z.union([z.literal(3), z.literal(6), z.literal(12)]),
+  interestDisposition: z.enum(["cash", "capitalize"]),
+});
+
+export type FdRolloverRequestInput = z.infer<typeof fdRolloverRequestSchema>;
