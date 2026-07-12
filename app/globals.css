@@ -166,4 +166,13 @@ body {
   body {
     background: #fff;
   }
+
+  /* Printing a modal's content (e.g. the client statement dialog): the
+     sheet is portaled straight to <body> so it escapes the dialog's
+     fixed/transformed positioning, and this class hides every other
+     direct child of <body> (app root, toasts, the dialog itself) while
+     printing, leaving only the portaled sheet. */
+  body.printing-portal > *:not(#print-portal-root) {
+    display: none !important;
+  }
 }

@@ -7,6 +7,7 @@ import { ArrowLeft, Download, Printer, User } from "lucide-react";
 import { CloseClientButton } from "@/components/admin/clients/close-client-button";
 import { DeleteClientDialog } from "@/components/admin/clients/delete-client-dialog";
 import { EditClientDialog } from "@/components/admin/clients/edit-client-dialog";
+import { PrintStatementDialog } from "@/components/admin/clients/print-statement-dialog";
 import { TransactionActions } from "@/components/admin/ledger/transaction-actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -94,6 +95,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
               <Download className="size-4" /> Download statement (CSV)
             </a>
           </Button>
+          <PrintStatementDialog client={client} activity={activity} />
           <CloseClientButton clientId={client.id} clientName={client.full_name} />
           <DeleteClientDialog clientId={client.id} clientName={client.full_name} />
         </div>
