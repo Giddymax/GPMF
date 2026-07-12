@@ -67,7 +67,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
         <div className="flex items-center gap-4">
           <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/5">
             {client.photo_url ? (
-              <Image src={client.photo_url} alt="" width={64} height={64} className="h-full w-full object-cover" />
+              <Image src={client.photo_url} alt="" width={160} height={160} quality={90} className="h-full w-full object-cover" />
             ) : (
               <User className="size-6 text-white/40" />
             )}

@@ -66,7 +66,7 @@ export default async function ClientsPage({
                   <Link href={`/admin/operations/clients/${client.id}`} className="flex items-center gap-2.5 font-medium text-white hover:text-gold-500">
                     <span className="flex size-7 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/5">
                       {client.photo_url ? (
-                        <Image src={client.photo_url} alt="" width={28} height={28} className="h-full w-full object-cover" />
+                        <Image src={client.photo_url} alt="" width={56} height={56} quality={90} className="h-full w-full object-cover" />
                       ) : (
                         <User className="size-3.5 text-white/40" />
                       )}

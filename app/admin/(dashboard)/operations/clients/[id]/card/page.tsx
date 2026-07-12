@@ -104,7 +104,7 @@ export default async function ClientCardPage({ params }: { params: Promise<{ id:
             <div className="mt-6 flex items-center gap-5">
               <div className="flex size-[24mm] shrink-0 items-center justify-center overflow-hidden rounded-md border border-[#E4E0D6] bg-[#FAFAF7]">
                 {client.photo_url ? (
-                  <Image src={client.photo_url} alt="" width={96} height={96} className="h-full w-full object-cover" />
+                  <Image src={client.photo_url} alt="" width={480} height={480} quality={100} className="h-full w-full object-cover" />
                 ) : (
                   <User className="size-8 text-[#4B5563]" />
                 )}
