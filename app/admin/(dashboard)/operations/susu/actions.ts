@@ -55,7 +55,8 @@ export async function recordSusuContribution(cycleId: string, agentId: string, a
 
   const clientId = (cycle as unknown as { accounts: { client_id: string } }).accounts?.client_id;
   if (clientId) {
-    await notifyClient(supabase, clientId, "susu_contribution", smsTemplates.susuContributionReceived(amount));
+    const { data: balanceRow } = await supabase.from("account_balances").select("balance").eq("account_id", cycle.account_id).single();
+    await notifyClient(supabase, clientId, "susu_contribution", smsTemplates.susuContributionReceived(amount, balanceRow?.balance ?? 0));
   }
 
   revalidatePath("/admin/operations/susu");
@@ -103,7 +104,8 @@ export async function processSusuPayout(cycleId: string, agentId: string): Promi
 
   const clientId = (cycle as unknown as { accounts: { client_id: string } }).accounts?.client_id;
   if (clientId) {
-    await notifyClient(supabase, clientId, "susu_payout", smsTemplates.susuPayoutCompleted(payout));
+    const { data: balanceRow } = await supabase.from("account_balances").select("balance").eq("account_id", cycle.account_id).single();
+    await notifyClient(supabase, clientId, "susu_payout", smsTemplates.susuPayoutCompleted(payout, balanceRow?.balance ?? 0));
   }
 
   revalidatePath("/admin/operations/susu");

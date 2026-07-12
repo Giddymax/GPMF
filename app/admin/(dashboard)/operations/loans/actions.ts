@@ -196,7 +196,7 @@ export async function disburseLoan(loanId: string): Promise<ActionResult> {
     .eq("id", loanId);
 
   if (loan.client_id) {
-    await notifyClient(supabase, loan.client_id, "loan_disbursement", smsTemplates.loanDisbursed(loan.principal, loan.loan_number));
+    await notifyClient(supabase, loan.client_id, "loan_disbursement", smsTemplates.loanDisbursed(loan.principal, loan.loan_number, total));
   }
 
   revalidatePath("/admin/operations/loans");
@@ -253,7 +253,13 @@ export async function recordRepayment(loanId: string, scheduleId: string, amount
   await supabase.from("loan_schedules").update({ status: newStatus }).eq("id", scheduleId);
 
   if (loan.client_id) {
-    await notifyClient(supabase, loan.client_id, "loan_repayment", smsTemplates.loanRepaymentReceived(amount, loan.loan_number));
+    const { data: balanceRow } = await supabase.from("loan_balances").select("outstanding_principal").eq("loan_id", loanId).single();
+    await notifyClient(
+      supabase,
+      loan.client_id,
+      "loan_repayment",
+      smsTemplates.loanRepaymentReceived(amount, loan.loan_number, Math.max(0, balanceRow?.outstanding_principal ?? 0))
+    );
   }
 
   revalidatePath("/admin/operations/loans");
@@ -338,7 +344,8 @@ export async function disburseGroupTranche(groupId: string, principalPerMember: 
     });
 
     if (member.client_id) {
-      await notifyClient(supabase, member.client_id, "loan_disbursement", smsTemplates.loanDisbursed(principalPerMember, loanNumber));
+      const groupLoanTotal = totalRepayable(principalPerMember, rate, termMonths);
+      await notifyClient(supabase, member.client_id, "loan_disbursement", smsTemplates.loanDisbursed(principalPerMember, loanNumber, groupLoanTotal));
     }
 
     await supabase.from("group_members").update({ status: "current" }).eq("id", member.id);

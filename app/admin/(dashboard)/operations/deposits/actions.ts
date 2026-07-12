@@ -74,7 +74,9 @@ async function postSavingsLedger(
 
   const { data: account } = await supabase.from("accounts").select("client_id").eq("id", accountId).single();
   if (account?.client_id) {
-    const message = type === "deposit" ? smsTemplates.depositReceived(amount) : smsTemplates.withdrawalProcessed(amount);
+    const { data: balanceRow } = await supabase.from("account_balances").select("balance").eq("account_id", accountId).single();
+    const balance = balanceRow?.balance ?? 0;
+    const message = type === "deposit" ? smsTemplates.depositReceived(amount, balance) : smsTemplates.withdrawalProcessed(amount, balance);
     await notifyClient(supabase, account.client_id, type === "deposit" ? "savings_deposit" : "savings_withdrawal", message);
   }
 }
