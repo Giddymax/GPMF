@@ -25,7 +25,7 @@ export function Hero({ slides }: { slides: HeroSlide[] }) {
 
   return (
     <section
-      className="relative overflow-hidden bg-gradient-navy text-white"
+      className="relative overflow-hidden bg-gradient-navy text-gold-200"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
@@ -74,10 +74,10 @@ export function Hero({ slides }: { slides: HeroSlide[] }) {
             aria-hidden={i !== index}
           >
             {slide.eyebrow ? <p className="eyebrow text-gold-200/90">{slide.eyebrow}</p> : null}
-            <h1 className="mt-4 font-heading text-4xl font-semibold leading-tight sm:text-5xl lg:text-6xl">
+            <h1 className="mt-4 font-heading text-4xl font-semibold leading-tight text-gold-500 sm:text-5xl lg:text-6xl">
               {slide.headline}
             </h1>
-            {slide.subheading ? <p className="mt-6 text-base text-white/80 sm:text-lg">{slide.subheading}</p> : null}
+            {slide.subheading ? <p className="mt-6 text-base text-gold-200/80 sm:text-lg">{slide.subheading}</p> : null}
             {slide.primary_cta_label && slide.primary_cta_href ? (
               <div className="mt-8 flex flex-wrap justify-center gap-4">
                 <Button size="lg" asChild>
@@ -90,7 +90,7 @@ export function Hero({ slides }: { slides: HeroSlide[] }) {
                 ) : null}
               </div>
             ) : null}
-            <div className="mt-8 flex items-center justify-center gap-2 text-sm text-white/70">
+            <div className="mt-8 flex items-center justify-center gap-2 text-sm text-gold-200/70">
               <ShieldCheck className="size-5 text-gold-500" />
               Licensed &amp; regulated · Bank of Ghana registered Last-Mile Provider
             </div>

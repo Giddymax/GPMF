@@ -1,4 +1,4 @@
-const CACHE_NAME = "gpfs-shell-v1";
+const CACHE_NAME = "gpfs-shell-v2";
 const APP_SHELL = ["/", "/admin/operations/susu", "/brand/icon-192.png", "/brand/logo.svg"];
 
 self.addEventListener("install", (event) => {
