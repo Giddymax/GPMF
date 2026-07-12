@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 
 export function SiteHeader() {
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const checkboxRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
     if (!mobileOpen) return;
@@ -30,6 +31,22 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
+      {/* Hidden checkbox + peer-checked CSS drives the mobile panel natively —
+          a fallback that works even if React hasn't hydrated yet (slow phone,
+          flaky connection). The label below is a real, JS-free toggle; its
+          onChange just keeps React state in sync so escape-to-close and
+          close-on-link-tap keep working once JS is live. Belt-and-suspenders
+          on purpose, not redundant: either mechanism alone can fail. */}
+      <input
+        ref={checkboxRef}
+        type="checkbox"
+        id="mobile-nav-toggle"
+        className="peer sr-only"
+        checked={mobileOpen}
+        onChange={(e) => setMobileOpen(e.target.checked)}
+        aria-hidden="true"
+        tabIndex={-1}
+      />
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Logo />
 
@@ -97,23 +114,29 @@ export function SiteHeader() {
 
         <div className="flex items-center gap-2 lg:hidden">
           <ThemeToggle />
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="size-11"
+          <label
+            htmlFor="mobile-nav-toggle"
+            role="button"
+            tabIndex={0}
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
             aria-expanded={mobileOpen}
-            onClick={() => setMobileOpen((v) => !v)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                checkboxRef.current?.click();
+              }
+            }}
+            className="inline-flex size-11 shrink-0 cursor-pointer touch-manipulation items-center justify-center rounded-md text-foreground transition-colors hover:bg-muted active:opacity-65"
           >
             {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
-          </Button>
+          </label>
         </div>
       </div>
 
       <div
         className={cn(
           "overflow-hidden border-t border-border bg-background transition-all duration-200 lg:hidden",
+          "peer-checked:max-h-[32rem] peer-checked:border-t",
           mobileOpen ? "max-h-[32rem]" : "max-h-0 border-t-0"
         )}
       >
