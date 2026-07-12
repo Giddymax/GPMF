@@ -12,7 +12,7 @@ import { Container } from "@/components/site/container";
 import { FaqAccordion } from "@/components/site/faq-accordion";
 import { SectionHeading } from "@/components/site/section-heading";
 import { siteConfig } from "@/lib/site-config";
-import { getFaqs, getPublishedPosts, getSiteStats, getTestimonials } from "@/lib/data/public";
+import { getFaqs, getHeroSlides, getPublishedPosts, getSiteStats, getTestimonials } from "@/lib/data/public";
 
 export const metadata: Metadata = {
   title: "Save a little every day. Build something big.",
@@ -21,7 +21,8 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const [stats, testimonials, faqs, posts] = await Promise.all([
+  const [heroSlides, stats, testimonials, faqs, posts] = await Promise.all([
+    getHeroSlides(),
     getSiteStats(),
     getTestimonials(),
     getFaqs(),
@@ -62,7 +63,7 @@ export default async function HomePage() {
         // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <Hero />
+      <Hero slides={heroSlides} />
       <TrustStatsBar stats={stats} />
       <ProductCards />
       <HowSusuWorks />

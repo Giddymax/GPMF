@@ -1,0 +1,35 @@
+"use client";
+
+import { createClient } from "@/lib/supabase/client";
+
+export interface UploadResult {
+  ok: boolean;
+  url?: string;
+  error?: string;
+}
+
+/** Uploads a homepage hero slide image to the public `hero-slides` bucket and returns its public URL. */
+export async function uploadHeroSlideImage(file: File): Promise<UploadResult> {
+  if (!file.type.startsWith("image/")) {
+    return { ok: false, error: "Please choose an image file." };
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    return { ok: false, error: "Image must be smaller than 5MB." };
+  }
+
+  const supabase = createClient();
+  const ext = file.name.split(".").pop() || "jpg";
+  const path = `${crypto.randomUUID()}.${ext}`;
+
+  const { error } = await supabase.storage.from("hero-slides").upload(path, file, {
+    cacheControl: "3600",
+    upsert: false,
+  });
+
+  if (error) {
+    return { ok: false, error: error.message };
+  }
+
+  const { data } = supabase.storage.from("hero-slides").getPublicUrl(path);
+  return { ok: true, url: data.publicUrl };
+}

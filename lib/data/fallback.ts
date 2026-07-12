@@ -3,7 +3,25 @@
  * project is connected yet (NEXT_PUBLIC_SUPABASE_URL unset) so the public
  * site renders fully in local dev before the database exists.
  */
-import type { Faq, Post, Rate, SiteStat, TeamMember, Testimonial } from "@/lib/supabase/types";
+import type { Faq, HeroSlide, Post, Rate, SiteStat, TeamMember, Testimonial } from "@/lib/supabase/types";
+
+export const fallbackHeroSlides: HeroSlide[] = [
+  {
+    id: "1",
+    image_url: null,
+    eyebrow: "Licensed last-mile financial services",
+    headline: "Save a little every day. Build something big.",
+    subheading:
+      "Daily susu, savings, fixed deposits and micro-loans — brought to your stall, your shop, your doorstep. As trustworthy as a bank, as familiar as your local susu collector.",
+    primary_cta_label: "Open an Account",
+    primary_cta_href: "/apply",
+    secondary_cta_label: "See how susu works",
+    secondary_cta_href: "/products/daily-susu",
+    sort_order: 1,
+    published: true,
+    created_at: new Date().toISOString(),
+  },
+];
 
 export const fallbackPosts: Post[] = [
   {

@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CONTENT_FIELDS, CONTENT_LABELS, CONTENT_TABLES } from "@/lib/admin-content-config";
 import {
   getAllFaqs,
+  getAllHeroSlides,
   getAllPosts,
   getAllRates,
   getAllSiteStats,
@@ -20,7 +21,8 @@ import { isSupabaseConfigured } from "@/lib/data/public";
 export const metadata: Metadata = { title: "Content & Settings" };
 
 export default async function ContentPage() {
-  const [posts, testimonials, faqs, rates, siteStats, teamMembers, productConfig] = await Promise.all([
+  const [heroSlides, posts, testimonials, faqs, rates, siteStats, teamMembers, productConfig] = await Promise.all([
+    getAllHeroSlides(),
     getAllPosts(),
     getAllTestimonials(),
     getAllFaqs(),
@@ -31,6 +33,7 @@ export default async function ContentPage() {
   ]);
 
   const rowsByTable = {
+    hero_slides: heroSlides,
     posts,
     testimonials,
     faqs,

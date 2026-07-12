@@ -1,7 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
-import type { Faq, Post, Rate, SiteStat, TeamMember, Testimonial } from "@/lib/supabase/types";
+import type { Faq, HeroSlide, Post, Rate, SiteStat, TeamMember, Testimonial } from "@/lib/supabase/types";
 import {
   fallbackFaqs,
+  fallbackHeroSlides,
   fallbackPosts,
   fallbackRates,
   fallbackSiteStats,
@@ -48,6 +49,19 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
     if (error) throw error;
     return data as Post | null;
   }, fallbackPosts.find((p) => p.slug === slug) ?? null);
+}
+
+export async function getHeroSlides(): Promise<HeroSlide[]> {
+  return safeQuery(async () => {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("hero_slides")
+      .select("*")
+      .eq("published", true)
+      .order("sort_order");
+    if (error) throw error;
+    return data as HeroSlide[];
+  }, fallbackHeroSlides);
 }
 
 export async function getTestimonials(): Promise<Testimonial[]> {

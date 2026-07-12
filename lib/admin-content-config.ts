@@ -1,8 +1,16 @@
-export type ContentTable = "posts" | "testimonials" | "faqs" | "rates" | "site_stats" | "team_members";
+export type ContentTable = "posts" | "testimonials" | "faqs" | "rates" | "site_stats" | "team_members" | "hero_slides";
 
-export const CONTENT_TABLES: ContentTable[] = ["posts", "testimonials", "faqs", "rates", "site_stats", "team_members"];
+export const CONTENT_TABLES: ContentTable[] = [
+  "hero_slides",
+  "posts",
+  "testimonials",
+  "faqs",
+  "rates",
+  "site_stats",
+  "team_members",
+];
 
-export type FieldType = "text" | "textarea" | "number" | "boolean";
+export type FieldType = "text" | "textarea" | "number" | "boolean" | "image";
 
 export interface ContentField {
   key: string;
@@ -12,6 +20,18 @@ export interface ContentField {
 }
 
 export const CONTENT_FIELDS: Record<ContentTable, ContentField[]> = {
+  hero_slides: [
+    { key: "image_url", label: "Slide image", type: "image" },
+    { key: "eyebrow", label: "Eyebrow text", type: "text" },
+    { key: "headline", label: "Headline", type: "text", required: true },
+    { key: "subheading", label: "Subheading", type: "textarea" },
+    { key: "primary_cta_label", label: "Primary button label", type: "text" },
+    { key: "primary_cta_href", label: "Primary button link", type: "text" },
+    { key: "secondary_cta_label", label: "Secondary button label", type: "text" },
+    { key: "secondary_cta_href", label: "Secondary button link", type: "text" },
+    { key: "sort_order", label: "Sort order", type: "number" },
+    { key: "published", label: "Published", type: "boolean" },
+  ],
   posts: [
     { key: "title", label: "Title", type: "text", required: true },
     { key: "slug", label: "Slug", type: "text", required: true },
@@ -62,6 +82,7 @@ export const CONTENT_FIELDS: Record<ContentTable, ContentField[]> = {
 };
 
 export const CONTENT_LABELS: Record<ContentTable, { title: string; primaryField: string }> = {
+  hero_slides: { title: "Hero slides", primaryField: "headline" },
   posts: { title: "News", primaryField: "title" },
   testimonials: { title: "Testimonials", primaryField: "name" },
   faqs: { title: "FAQs", primaryField: "question" },

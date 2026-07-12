@@ -13,6 +13,7 @@ import type {
   FdEvent,
   FixedDeposit,
   GlTrialBalanceRow,
+  HeroSlide,
   Group,
   GroupMember,
   Inquiry,
@@ -780,6 +781,11 @@ export async function getAllPosts(): Promise<Post[]> {
 export async function getAllTestimonials(): Promise<Testimonial[]> {
   const supabase = await createClient();
   return query(async () => supabase.from("testimonials").select("*").order("sort_order"), []);
+}
+
+export async function getAllHeroSlides(): Promise<HeroSlide[]> {
+  const supabase = await createClient();
+  return query(async () => supabase.from("hero_slides").select("*").order("sort_order"), []);
 }
 
 export async function getAllFaqs(): Promise<Faq[]> {

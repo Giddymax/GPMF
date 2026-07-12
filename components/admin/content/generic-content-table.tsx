@@ -21,6 +21,7 @@ import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import type { ContentField, ContentTable } from "@/lib/admin-content-config";
+import { uploadHeroSlideImage } from "@/lib/storage/upload-hero-slide-image";
 import { deleteContentRow, upsertContentRow } from "@/app/admin/(dashboard)/content/actions";
 
 interface Row {
@@ -46,6 +47,20 @@ export function GenericContentTable({
   const [editing, setEditing] = React.useState<Row | null>(null);
   const [values, setValues] = React.useState<Record<string, unknown>>({});
   const [submitting, setSubmitting] = React.useState(false);
+  const [uploadingField, setUploadingField] = React.useState<string | null>(null);
+
+  async function handleImageChange(field: string, e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingField(field);
+    const result = await uploadHeroSlideImage(file);
+    setUploadingField(null);
+    if (result.ok && result.url) {
+      setValues((val) => ({ ...val, [field]: result.url }));
+    } else {
+      toast.error(result.error || "Could not upload the image.");
+    }
+  }
 
   function openNew() {
     setEditing(null);
@@ -136,7 +151,33 @@ export function GenericContentTable({
           <div className="space-y-4">
             {fields.map((field) => (
               <div key={field.key}>
-                {field.type === "boolean" ? (
+                {field.type === "image" ? (
+                  <>
+                    <Label htmlFor={field.key}>{field.label}</Label>
+                    <div className="mt-1.5 flex items-center gap-3">
+                      {values[field.key] ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={String(values[field.key])}
+                          alt=""
+                          className="h-14 w-24 rounded-md border border-border object-cover"
+                        />
+                      ) : null}
+                      <div>
+                        <Input
+                          id={field.key}
+                          type="file"
+                          accept="image/*"
+                          className="max-w-xs"
+                          onChange={(e) => handleImageChange(field.key, e)}
+                        />
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {uploadingField === field.key ? "Uploading…" : values[field.key] ? "Uploaded." : "No image yet."}
+                        </p>
+                      </div>
+                    </div>
+                  </>
+                ) : field.type === "boolean" ? (
                   <div className="flex items-center justify-between">
                     <Label htmlFor={field.key}>{field.label}</Label>
                     <Switch

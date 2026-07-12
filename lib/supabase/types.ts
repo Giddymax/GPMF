@@ -338,6 +338,21 @@ export interface Faq {
   published: boolean;
 }
 
+export interface HeroSlide {
+  id: string;
+  image_url: string | null;
+  eyebrow: string | null;
+  headline: string;
+  subheading: string | null;
+  primary_cta_label: string | null;
+  primary_cta_href: string | null;
+  secondary_cta_label: string | null;
+  secondary_cta_href: string | null;
+  sort_order: number;
+  published: boolean;
+  created_at: string;
+}
+
 export interface Rate {
   id: string;
   product: string;
