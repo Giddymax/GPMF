@@ -155,6 +155,19 @@ body {
   }
 }
 
+/* iOS Safari auto-zooms the whole page when focusing an input with a
+   computed font-size under 16px. Every form in the app used text-sm (14px)
+   inputs, so any tap into a field on an iPhone zoomed the viewport in and
+   never zoomed back out — the @supports guard scopes this to iOS/iPadOS
+   Safari specifically rather than bumping input text size everywhere. */
+@supports (-webkit-touch-callout: none) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
 /* Printable A4 documents (client profile sheet, etc.) — zero browser margin
    so the page's own 210mm/16mm layout is exactly what prints, no double margin. */
 @media print {

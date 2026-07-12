@@ -21,11 +21,20 @@ export function AdminTopbar({ name, role, className }: { name: string; role: str
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const pathname = usePathname();
 
+  React.useEffect(() => {
+    if (!mobileOpen) return;
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setMobileOpen(false);
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [mobileOpen]);
+
   return (
     <header className={cn("flex h-16 items-center justify-between border-b border-white/10 bg-navy-900 px-4 sm:px-6", className)}>
       <div className="flex items-center gap-3 lg:hidden">
         <LogoIcon className="h-7 w-7" />
-        <Button variant="ghost" size="icon" onClick={() => setMobileOpen(true)} aria-label="Open menu">
+        <Button variant="ghost" size="icon" className="size-11" onClick={() => setMobileOpen(true)} aria-label="Open menu">
           <Menu className="size-5 text-white" />
         </Button>
       </div>
@@ -52,7 +61,7 @@ export function AdminTopbar({ name, role, className }: { name: string; role: str
             <Button
               variant="ghost"
               size="icon"
-              className="mb-4 self-end"
+              className="mb-4 size-11 self-end"
               onClick={() => setMobileOpen(false)}
               aria-label="Close menu"
             >
